@@ -1,0 +1,12 @@
+langchain
+langchain-community
+langchain-groq
+langchain-huggingface
+chromadb
+pypdf
+python-docx
+pandas
+beautifulsoup4
+python-dotenv
+sentence-transformers
+ruff
