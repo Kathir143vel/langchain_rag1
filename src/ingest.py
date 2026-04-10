@@ -16,6 +16,7 @@ from langchain_chroma import Chroma  # Updated to the non-deprecated version
 
 load_dotenv()
 
+
 def get_loader(file_path):
     """Factory to return the correct loader based on file extension."""
     ext = os.path.splitext(file_path)[1].lower()
@@ -29,6 +30,7 @@ def get_loader(file_path):
         return UnstructuredHTMLLoader(file_path)
     return TextLoader(file_path)
 
+
 def ingest_data():
     data_dir = "data/"
     if not os.path.exists(data_dir):
@@ -38,7 +40,7 @@ def ingest_data():
 
     raw_documents = []
     print("📂 Loading files from /data...")
-    
+
     for filename in os.listdir(data_dir):
         file_path = os.path.join(data_dir, filename)
         if os.path.isfile(file_path):
@@ -61,7 +63,7 @@ def ingest_data():
         ("###", "Header 3"),
     ]
     md_splitter = MarkdownHeaderTextSplitter(headers_to_split_on=headers_to_split_on)
-    
+
     # Combine text and split by headers
     full_text = "\n\n".join([doc.page_content for doc in raw_documents])
     md_header_splits = md_splitter.split_text(full_text)
@@ -69,10 +71,7 @@ def ingest_data():
     # 2. Second Pass: Recursive Character Splitting (The 'safety net')
     # chunk_size is 512 because BAAI/bge-small-en-v1.5 has a 512-token limit
     recursive_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=512,
-        chunk_overlap=50,
-        add_start_index=True,
-        strip_whitespace=True
+        chunk_size=512, chunk_overlap=50, add_start_index=True, strip_whitespace=True
     )
     final_chunks = recursive_splitter.split_documents(md_header_splits)
 
@@ -83,13 +82,12 @@ def ingest_data():
     # 4. Vector Store (ChromaDB)
     print("💾 Saving to ChromaDB...")
     # This will overwrite/update the existing DB in chroma_db folder
-    vectorstore = Chroma.from_documents(
-        documents=final_chunks,
-        embedding=embeddings,
-        persist_directory="./chroma_db"
+    Chroma.from_documents(
+        documents=final_chunks, embedding=embeddings, persist_directory="./chroma_db"
     )
-    
+
     print(f"✅ Successfully ingested {len(final_chunks)} chunks.")
+
 
 if __name__ == "__main__":
     ingest_data()
